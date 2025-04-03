@@ -40,6 +40,24 @@ function handleCart(e) {
   ) {
     document.querySelector("#cart-menu").classList.toggle("d-none")
   }
+
+  if(e.target.classList.contains("fa-xmark") || e.target.classList.contains("cart-closed")) {
+    // console.log(e.target.parentElement.parentElement.parentElement)
+    const thisCartItem = e.target.closest(".cart-item")
+    // console.log(thisCartItem)
+    
+    const productName = thisCartItem.querySelector(".cart-product-title").textContent.trim()
+    // console.log(productName)
+    // remove from dom
+    thisCartItem.remove()
+
+    // get data from localStorage to remove some item from localStorage
+    const data = JSON.parse(localStorage.getItem('allProductsData'))
+    // filter item
+    const newDataToStorage = data.filter(item => item.productName !== productName)
+    // saving new localStorage
+    localStorage.setItem('allProductsData', JSON.stringify(newDataToStorage))
+  }
 }
 
 function addItemsToCart(e) {
