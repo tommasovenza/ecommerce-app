@@ -1,11 +1,37 @@
 const header = document.querySelector("#header")
 const url = window.location.href
 const cartState = localStorage.getItem('cartState')
-console.log(cartState);
-const dataToSave = []
+const dataInStorage = localStorage.getItem('allProductsData')
+let dataToSave = []
+
+function retrieveFromStorage(rawData) {
+  const data = JSON.parse(rawData)
+  const cartMenu = document.querySelector("#cart-menu")
+  
+  data.map(item => {
+    const cartItem = document.createElement('div')
+    cartItem.classList.add('cart-item')
+    cartItem.innerHTML = `
+    <div class="cart-image" style="background-color: ${item.primaryColor}">
+      <div class="cart-closed">
+        <i class="fa-solid fa-xmark"></i>
+      </div>
+    </div>
+    <div class="cart-description">
+      <div class="cart-product-title">
+        ${item.productName}
+      </div>
+      <div class="cart-product-price">
+        ${item.productPrice}
+      </div>
+    </div>
+    `
+    // appening new element before cart total
+    cartMenu.insertAdjacentElement('afterbegin', cartItem)
+  })
+}
 
 function handleCart(e) {
-  console.log(e.target)
   
   if(
     e.target.classList.contains("cart") || 
@@ -17,9 +43,12 @@ function handleCart(e) {
 }
 
 function addItemsToCart(e) {
-  // console.log(e.target)
   if(e.target.classList.contains("add-to-cart")) {
-    console.log("clicked");
+
+    if(dataInStorage) {
+      dataToSave = JSON.parse(localStorage.getItem('allProductsData'))
+    }
+
     // get cart
     const cart = document.querySelector(".cart.icon")
     const cartMenu = document.querySelector("#cart-menu")
@@ -30,13 +59,10 @@ function addItemsToCart(e) {
 
     // get data to create cart menu
     const descElem = e.target.parentElement.previousElementSibling
-    // const primaryColor = descElem.querySelector("h3").textContent
     const productName = descElem.querySelector("h2").textContent
     const productPrice = descElem.querySelector("h4").textContent
     const product = e.target.closest(".product")
-    // console.log(product)
     const primaryColor = product.querySelector(".product-image").getAttribute("style").split(":")[1].trim()
-    console.log(primaryColor)
 
     const jsonData = {
       primaryColor: primaryColor,
@@ -72,7 +98,6 @@ function addItemsToCart(e) {
 }
 
 function printTeamData(data) {
-  console.log(data)
   const teamGrid = document.querySelector("#team-grid")
   // loop
   data.map(item => {
@@ -92,7 +117,6 @@ function printTeamData(data) {
 }
 
 function printProductData(data) {
-  console.log(data)
   const productsGrid = document.querySelector("#product-grid")
   // loop
   data.map(item => {
@@ -119,8 +143,6 @@ function printProductData(data) {
 
 function injectTeams() {
   const endpoint = "/teams.json"
-  console.log(endpoint);
-
   fetch(endpoint)
     .then(res => res.json())
     .then(data => printTeamData(data))
@@ -129,8 +151,6 @@ function injectTeams() {
 
 function injectProducts() {
   const endpoint = "/items.json"
-  console.log(endpoint);
-
   fetch(endpoint)
     .then(res => res.json())
     .then(data => printProductData(data))
@@ -138,8 +158,6 @@ function injectProducts() {
 }
 
 function createNavbar() {
-  // console.log("create")
-
   const html = `
     <div class="navbar">
       <ul class="navbar-list">
@@ -167,6 +185,10 @@ function createNavbar() {
   header.innerHTML = html
 
   checkPage()
+
+  if(dataInStorage) {
+    retrieveFromStorage(dataInStorage)
+  }
 }
 
 function checkPage() {
@@ -178,17 +200,14 @@ function checkPage() {
   } else {
     navbar.querySelector("ul > li:nth-child(3) > a").classList.add('active')
   }
-  // console.log(navbar)
 }
 
 function init() {
   if(url.includes('store')) {
     document.addEventListener("DOMContentLoaded", injectProducts)
-    console.log("store page")
   }
   if(url.includes('team')) {
     document.addEventListener("DOMContentLoaded", injectTeams)
-    console.log("team page")
   }
   // add event listener
   document.addEventListener("DOMContentLoaded", createNavbar)
