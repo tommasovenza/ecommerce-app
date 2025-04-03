@@ -2,7 +2,12 @@ const header = document.querySelector("#header")
 const url = window.location.href
 const cartState = localStorage.getItem('cartState')
 const dataInStorage = localStorage.getItem('allProductsData')
+let counter = localStorage.getItem('counter')
 let dataToSave = []
+
+function updateCounter() {
+  document.querySelector(".items-number").textContent = counter
+}
 
 function retrieveFromStorage(rawData) {
   const data = JSON.parse(rawData)
@@ -32,7 +37,6 @@ function retrieveFromStorage(rawData) {
 }
 
 function handleCart(e) {
-  
   if(
     e.target.classList.contains("cart") || 
     e.target.classList.contains("fa-cart-shopping") || 
@@ -42,6 +46,14 @@ function handleCart(e) {
   }
 
   if(e.target.classList.contains("fa-xmark") || e.target.classList.contains("cart-closed")) {
+
+    // decrementing counter
+    counter--
+    updateCounter()
+
+    // updating localStorage counter value
+    localStorage.setItem('counter', JSON.stringify(counter))
+
     // console.log(e.target.parentElement.parentElement.parentElement)
     const thisCartItem = e.target.closest(".cart-item")
     // console.log(thisCartItem)
@@ -62,6 +74,10 @@ function handleCart(e) {
 
 function addItemsToCart(e) {
   if(e.target.classList.contains("add-to-cart")) {
+    // incrementing counter
+    counter++
+    // updating counter
+    updateCounter()
 
     if(dataInStorage) {
       dataToSave = JSON.parse(localStorage.getItem('allProductsData'))
@@ -87,10 +103,12 @@ function addItemsToCart(e) {
       productName: productName,
       productPrice: productPrice,
     }
+  
     dataToSave.push(jsonData)
 
     // store all items data into localStorage
     localStorage.setItem('allProductsData', JSON.stringify(dataToSave))
+    localStorage.setItem('counter', JSON.stringify(counter))
 
     // create a cart menu on right side screen
     const cartItem = document.createElement('div')
@@ -187,7 +205,7 @@ function createNavbar() {
 
     <div class="icon cart ${cartState ? '' : 'd-none'}">
       <i class="fa-solid fa-cart-shopping"></i>
-      <div class="items-number">2</>
+      <div class="items-number">${counter}</>
     </div>
 
     <div class="cart-menu d-none" id="cart-menu">
