@@ -3,6 +3,18 @@ const url = window.location.href
 const cartState = localStorage.getItem('cartState')
 console.log(cartState);
 
+function handleCart(e) {
+  console.log(e.target)
+  
+  if(
+    e.target.classList.contains("cart") || 
+    e.target.classList.contains("fa-cart-shopping") || 
+    e.target.classList.contains("items-number")
+  ) {
+    document.querySelector("#cart-menu").classList.toggle("d-none")
+  }
+}
+
 function addItemsToCart(e) {
   // console.log(e.target)
   
@@ -101,23 +113,7 @@ function createNavbar() {
       <div class="items-number">2</>
     </div>
 
-    <div class="cart-menu" id="cart-menu">
-      <div class="cart-item">
-        <div class="cart-image">
-          <div class="cart-closed">
-            <i class="fa-solid fa-xmark"></i>
-          </div>
-        </div>
-        <div class="cart-description">
-          <div class="cart-product-title">
-            Yellow
-          </div>
-          <div class="cart-product-price">
-            $21.00
-          </div>
-        </div>
-      </div>
-
+    <div class="cart-menu d-none" id="cart-menu">
       <div class="cart-item">
         <div class="cart-image">
           <div class="cart-closed">
@@ -170,6 +166,7 @@ function init() {
   }
   // add event listener
   document.addEventListener("DOMContentLoaded", createNavbar)
+  header.addEventListener('click', handleCart)
 }
 // init
 init()
