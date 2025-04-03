@@ -2,6 +2,7 @@ const header = document.querySelector("#header")
 const url = window.location.href
 const cartState = localStorage.getItem('cartState')
 console.log(cartState);
+const dataToSave = []
 
 function handleCart(e) {
   console.log(e.target)
@@ -17,16 +18,56 @@ function handleCart(e) {
 
 function addItemsToCart(e) {
   // console.log(e.target)
-  
   if(e.target.classList.contains("add-to-cart")) {
     console.log("clicked");
     // get cart
     const cart = document.querySelector(".cart.icon")
+    const cartMenu = document.querySelector("#cart-menu")
     // show cart
     cart.classList.remove("d-none")
     // set cart as visible in LocalStorage
     localStorage.setItem('cartState', true)
+
+    // get data to create cart menu
+    const descElem = e.target.parentElement.previousElementSibling
+    // const primaryColor = descElem.querySelector("h3").textContent
+    const productName = descElem.querySelector("h2").textContent
+    const productPrice = descElem.querySelector("h4").textContent
+    const product = e.target.closest(".product")
+    // console.log(product)
+    const primaryColor = product.querySelector(".product-image").getAttribute("style").split(":")[1].trim()
+    console.log(primaryColor)
+
+    const jsonData = {
+      primaryColor: primaryColor,
+      productName: productName,
+      productPrice: productPrice,
+    }
+    dataToSave.push(jsonData)
+
+    // store all items data into localStorage
+    localStorage.setItem('allProductsData', JSON.stringify(dataToSave))
+
     // create a cart menu on right side screen
+    const cartItem = document.createElement('div')
+    cartItem.classList.add('cart-item')
+    cartItem.innerHTML = `
+    <div class="cart-image" style="background-color: ${primaryColor}">
+      <div class="cart-closed">
+        <i class="fa-solid fa-xmark"></i>
+      </div>
+    </div>
+    <div class="cart-description">
+      <div class="cart-product-title">
+        ${productName}
+      </div>
+      <div class="cart-product-price">
+        ${productPrice}
+      </div>
+    </div>
+    `
+    // appening new element before cart total
+    cartMenu.insertAdjacentElement('afterbegin', cartItem)
   }
 }
 
@@ -114,22 +155,7 @@ function createNavbar() {
     </div>
 
     <div class="cart-menu d-none" id="cart-menu">
-      <div class="cart-item">
-        <div class="cart-image">
-          <div class="cart-closed">
-            <i class="fa-solid fa-xmark"></i>
-          </div>
-        </div>
-        <div class="cart-description">
-          <div class="cart-product-title">
-            Yellow
-          </div>
-          <div class="cart-product-price">
-            $21.00
-          </div>
-        </div>
-      </div>
-
+      
       <div class="cart-total-price">
         <div>TOTAL</div>
         <div class="total-price">
