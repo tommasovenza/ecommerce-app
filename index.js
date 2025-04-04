@@ -2,16 +2,29 @@ const header = document.querySelector("#header")
 const url = window.location.href
 const cartState = localStorage.getItem('cartState')
 const dataInStorage = localStorage.getItem('allProductsData')
-const allPrices = []
+let allPrices = []
 let counter = localStorage.getItem('counter')
 let dataToSave = []
 
 function printTotalPrice(prices) {
-  console.log(prices)
+  // console.log(prices)
   const total = prices.reduce((total, currentPrice) => total + currentPrice, 0)
-  console.log(total)
+  // console.log(total)
   const totalResultEl = document.querySelector("#total-price")
   totalResultEl.textContent = `$ ${total}`
+}
+
+function decreaseTotalPrice(prices) {
+  // console.log(prices)
+  const total = prices.reduce((total, currentPrice) => total - currentPrice, 0)
+  console.log(total)
+  const totalResultEl = document.querySelector("#total-price")
+  if(total !== 0) {
+    const result = total.toString().split("-")[1]
+    totalResultEl.textContent = `$ ${result}`
+  } else {
+    totalResultEl.textContent = 0
+  }
 }
 
 function updateCounter() {
@@ -71,6 +84,14 @@ function handleCart(e) {
     // console.log(productName)
     // remove from dom
     thisCartItem.remove()
+
+    // getting current price to remove
+    const thisPrice = parseInt(thisCartItem.querySelector(".cart-product-price").textContent.trim().split(" ")[1])
+    console.log(thisPrice)
+    
+    // update total
+    allPrices = allPrices.filter( currentPrice => currentPrice !== thisPrice )
+    decreaseTotalPrice(allPrices)
 
     // get data from localStorage to remove some item from localStorage
     const data = JSON.parse(localStorage.getItem('allProductsData'))
