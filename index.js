@@ -2,8 +2,17 @@ const header = document.querySelector("#header")
 const url = window.location.href
 const cartState = localStorage.getItem('cartState')
 const dataInStorage = localStorage.getItem('allProductsData')
+const allPrices = []
 let counter = localStorage.getItem('counter')
 let dataToSave = []
+
+function printTotalPrice(prices) {
+  console.log(prices)
+  const total = prices.reduce((total, currentPrice) => total + currentPrice, 0)
+  console.log(total)
+  const totalResultEl = document.querySelector("#total-price")
+  totalResultEl.textContent = `$ ${total}`
+}
 
 function updateCounter() {
   document.querySelector(".items-number").textContent = counter
@@ -97,6 +106,11 @@ function addItemsToCart(e) {
     const productPrice = descElem.querySelector("h4").textContent
     const product = e.target.closest(".product")
     const primaryColor = product.querySelector(".product-image").getAttribute("style").split(":")[1].trim()
+
+    // write logic to sum data and print inside cart total
+    const rightPrice = parseInt(productPrice.split(" ")[1].trim())
+    allPrices.push(rightPrice)
+    printTotalPrice(allPrices)
 
     const jsonData = {
       primaryColor: primaryColor,
@@ -212,9 +226,7 @@ function createNavbar() {
       
       <div class="cart-total-price">
         <div>TOTAL</div>
-        <div class="total-price">
-          $3700
-        </div>
+        <div class="total-price" id="total-price"></div>
       </div>
     </div>
     `
