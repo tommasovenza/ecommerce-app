@@ -1,38 +1,70 @@
-const header = document.querySelector("#header")
 const url = window.location.href
+const header = document.querySelector("#header")
 const cartState = localStorage.getItem('cartState')
-const dataInStorage = localStorage.getItem('allProductsData')
+// fetch this later =>
+const totalPriceFromStorage = localStorage.getItem('totalPrice')
+// items from storage
+const dataInStorage = JSON.parse(localStorage.getItem('allProductsData'))
+const allPricesFromStorage = JSON.parse(localStorage.getItem('allPrices'))
+// set counter
+let counter = settingCounter()
+console.log(counter)
+
+// arrays
 let allPrices = []
-let counter = localStorage.getItem('counter')
 let dataToSave = []
 
+// so I did not fetch data from storage before filtering and updating it
+// I mean counter, all data and prices
+
+function settingCounter() {
+  let counter
+  if(localStorage.getItem('counter') !== null) {
+    counter = localStorage.getItem('counter')
+  } else {
+    counter = 0
+  }
+  return counter
+ }
+
 function printTotalPrice(prices) {
-  // console.log(prices)
+  console.log(prices)
   const total = prices.reduce((total, currentPrice) => total + currentPrice, 0)
   // console.log(total)
   const totalResultEl = document.querySelector("#total-price")
   totalResultEl.textContent = `$ ${total}`
+
+  // set total price, a number in storage to fetch later
+  localStorage.setItem('totalPrice', total)
 }
 
 function decreaseTotalPrice(prices) {
   // console.log(prices)
   const total = prices.reduce((total, currentPrice) => total - currentPrice, 0)
-  console.log(total)
+  // console.log(total)
   const totalResultEl = document.querySelector("#total-price")
   if(total !== 0) {
     const result = total.toString().split("-")[1]
     totalResultEl.textContent = `$ ${result}`
+
+    // set total price, a number in storage to fetch later
+    localStorage.setItem('totalPrice', result)
   } else {
     totalResultEl.textContent = 0
+    // set total price, a number in storage to fetch later
+    localStorage.setItem('totalPrice', 0)
   }
 }
 
 function updateCounter() {
+  // updating counter in DOM
   document.querySelector(".items-number").textContent = counter
+  // updating localStorage counter value
+  localStorage.setItem('counter', counter)
 }
 
-function retrieveFromStorage(rawData) {
-  const data = JSON.parse(rawData)
+function retrieveFromStorage(data) {
+  // const data = JSON.parse(rawData)
   const cartMenu = document.querySelector("#cart-menu")
   
   data.map(item => {
@@ -69,29 +101,38 @@ function handleCart(e) {
 
   if(e.target.classList.contains("fa-xmark") || e.target.classList.contains("cart-closed")) {
 
+    // get counter from storage
+    if(localStorage.getItem('counter') !== null) {
+      counter = parseInt(localStorage.getItem('counter'))
+    }
+
     // decrementing counter
     counter--
     updateCounter()
 
-    // updating localStorage counter value
-    localStorage.setItem('counter', JSON.stringify(counter))
+    // get prices from storage
+    if(allPricesFromStorage !== null) {
+      allPrices = allPricesFromStorage
+    }
+    // console.log("all prices from storage: ", allPrices)
 
-    // console.log(e.target.parentElement.parentElement.parentElement)
     const thisCartItem = e.target.closest(".cart-item")
-    // console.log(thisCartItem)
-    
     const productName = thisCartItem.querySelector(".cart-product-title").textContent.trim()
-    // console.log(productName)
-    // remove from dom
-    thisCartItem.remove()
-
-    // getting current price to remove
+    // getting current price to remove // there's error HERE => sometimes thisPrince is empty!!!
     const thisPrice = parseInt(thisCartItem.querySelector(".cart-product-price").textContent.trim().split(" ")[1])
-    console.log(thisPrice)
+
+    // console.log(thisPrice)
     
     // update total
+    // console.log("prices before: ", allPrices)
     allPrices = allPrices.filter( currentPrice => currentPrice !== thisPrice )
+    // console.log("prices after: ", allPrices)
+
+    // console.log(allPrices)
     decreaseTotalPrice(allPrices)
+
+    // remove from dom
+    thisCartItem.remove()
 
     // get data from localStorage to remove some item from localStorage
     const data = JSON.parse(localStorage.getItem('allProductsData'))
@@ -110,7 +151,8 @@ function addItemsToCart(e) {
     updateCounter()
 
     if(dataInStorage) {
-      dataToSave = JSON.parse(localStorage.getItem('allProductsData'))
+      dataToSave = dataInStorage
+      // dataToSave = JSON.parse(localStorage.getItem('allProductsData'))
     }
 
     // get cart
@@ -138,12 +180,16 @@ function addItemsToCart(e) {
       productName: productName,
       productPrice: productPrice,
     }
-  
+    
     dataToSave.push(jsonData)
 
-    // store all items data into localStorage
+    // => store data in localStorage
+    // storing counter in storage (Type: number)
+    localStorage.setItem('counter', counter)
+    // storing allProducts in storage (Type: Json)
     localStorage.setItem('allProductsData', JSON.stringify(dataToSave))
-    localStorage.setItem('counter', JSON.stringify(counter))
+    // storing allPrices in storage (Type: Array)
+    localStorage.setItem('allPrices', JSON.stringify(allPrices))
 
     // create a cart menu on right side screen
     const cartItem = document.createElement('div')
@@ -257,6 +303,10 @@ function createNavbar() {
 
   if(dataInStorage) {
     retrieveFromStorage(dataInStorage)
+  }
+
+  if(totalPriceFromStorage !== null) {
+    document.querySelector("#total-price").textContent = `$ ${totalPriceFromStorage}`
   }
 }
 
