@@ -1,5 +1,3 @@
-// so I did not fetch data from storage before filtering and updating it
-// I mean counter, all data and prices
 const url = window.location.href
 const header = document.querySelector("#header")
 const cartState = localStorage.getItem('cartState')
@@ -9,11 +7,45 @@ const dataInStorage = JSON.parse(localStorage.getItem('allProductsData'))
 const allPricesFromStorage = JSON.parse(localStorage.getItem('allPrices'))
 // set counter
 let counter = settingCounter()
-console.log(counter)
+// console.log(counter)
 
 // arrays
+const chosenProductsIds = []
 let allPrices = []
 let dataToSave = []
+
+// functions
+function checkItemsQuantity() {
+  // get cart menu
+  const cartMenu = document.querySelector("#cart-menu")
+
+  chosenProductsIds.map(id => {
+    // find item to change
+    const findItemInCart = cartMenu.querySelector(`.item-id-${id}`)
+    // get parent element
+    const thisCartItem = findItemInCart.closest(".cart-item")
+    // get quantity element
+    const quantityEl = thisCartItem.querySelector(".quantity")
+    quantityEl.classList.remove("d-none")
+    // get price 
+    const thisPrice = thisCartItem.querySelector(".cart-product-price").textContent.trim().split(" ")[1]
+    console.log(thisPrice)
+    
+    // 
+    if(quantityEl.classList.contains("first-click")) {
+      let quantity = parseInt(quantityEl.dataset.quantity)
+      quantity += 1
+      quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
+      quantityEl.setAttribute("data-quantity", quantity)
+    } else {
+      // console.log("this is first click")
+      const quantity = 2
+      quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
+      quantityEl.classList.add("first-click")
+      quantityEl.setAttribute("data-quantity", quantity)
+    }
+  })
+}
 
 function settingCounter() {
   let counter
@@ -26,7 +58,7 @@ function settingCounter() {
 }
 
 function printTotalPrice(prices) {
-  console.log(prices)
+  // console.log(prices)
   const total = prices.reduce((total, currentPrice) => total + currentPrice, 0)
   // console.log(total)
   const totalResultEl = document.querySelector("#total-price")
@@ -124,22 +156,13 @@ function handleCart(e) {
     if(allPricesFromStorage !== null) {
       allPrices = allPricesFromStorage
     }
-    // console.log("all prices from storage: ", allPrices)
 
     const thisCartItem = e.target.closest(".cart-item")
     const productName = thisCartItem.querySelector(".cart-product-title").textContent.trim()
-    // getting current price to remove // there's error HERE => sometimes thisPrince is empty!!!
     const thisPrice = parseInt(thisCartItem.querySelector(".cart-product-price").textContent.trim().split(" ")[1])
-
-    // console.log(thisPrice)
-    // update total
-    // console.log("prices before: ", allPrices)
 
     // filtering all prices
     allPrices = allPrices.filter( currentPrice => currentPrice !== thisPrice )
-    // console.log("prices after: ", allPrices)
-    // console.log(allPrices)
-
     // decrease total price
     decreaseTotalPrice(allPrices)
 
@@ -190,13 +213,26 @@ function addItemsToCart(e) {
       allPrices = allPricesFromStorage
     }
 
+    // get Item's Id
+    const itemId = e.target.parentElement.parentElement.dataset.productId
+    if(!chosenProductsIds.includes(itemId)) {
+      // push id into array
+      chosenProductsIds.push(itemId)
+    } else {
+      checkItemsQuantity()
+      return
+    }
+    // console.log(chosenProductsIds)
+
     allPrices.push(rightPrice)
     printTotalPrice(allPrices)
 
     const jsonData = {
+      id: itemId,
       primaryColor: primaryColor,
       productName: productName,
       productPrice: productPrice,
+      // quantity: 1
     }
     
     dataToSave.push(jsonData)
@@ -214,6 +250,7 @@ function addItemsToCart(e) {
     cartItem.classList.add('cart-item')
     cartItem.innerHTML = `
     <div class="cart-image" style="background-color: ${primaryColor}">
+      <div class="item-id-${itemId}" data-product-id="${itemId}"></div>
       <div class="cart-closed">
         <i class="fa-solid fa-xmark"></i>
       </div>
@@ -223,11 +260,11 @@ function addItemsToCart(e) {
         ${productName}
       </div>
       <div class="cart-product-price">
-        ${productPrice}
+        ${productPrice} <div class="quantity d-none"></div>
       </div>
     </div>
     `
-    // appening new element before cart total
+    // appending new element before cart total
     cartMenu.insertAdjacentElement('afterbegin', cartItem)
   }
 }
@@ -259,7 +296,7 @@ function printProductData(data) {
     product.classList.add("product")
     product.innerHTML = `
     <div class="product-image" style="background-color: #${item.imageColor}"></div>
-      <div class="product-description">
+      <div class="product-description" data-product-id="${item.id}">
         <div class="desc">
           <h3>${item.category}</h3>
           <h2>${item.name}</h2>
@@ -271,9 +308,9 @@ function printProductData(data) {
     </div>
     `
     productsGrid.appendChild(product)
-    // Add Event Listener
-    productsGrid.addEventListener('click', addItemsToCart)
   })
+  // Add Event Listener
+  productsGrid.addEventListener('click', addItemsToCart)
 }
 
 function injectTeams() {
@@ -353,3 +390,21 @@ function init() {
 // init
 init()
 
+// if(chosenProductsIds.includes(itemId)) {
+//   const thisQuantity = cartItem.querySelector(".quantity.d-none")
+//   thisQuantity.classList.remove("d-none")
+//   thisQuantity.textContent = quantity++
+// }
+
+// => IDEAS
+// ${productName} ${counterItems > 2 ? `x ${counterItems}` : ''}
+// ${productPrice} ${counterItems > 2 ? `${productPrice} x ${counterItems}` : ''}
+// // push id into array
+// chosenProductsIds.push(itemId)
+// // storing allProductIds in storage (Type: Array)
+// localStorage.setItem('allProductIds', JSON.stringify(chosenProductsIds))
+
+// IDEAS
+// if(chosenProductsIds.includes(itemId)) {
+//   counterItems++;
+// }
