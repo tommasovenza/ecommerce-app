@@ -16,51 +16,62 @@ let dataToSave = []
 
 // functions
 function calculateNewPrice(quantity, thisPrice) {
-  $result = []
+  const result = []
   const product = parseInt(quantity) * parseInt(thisPrice)
-  $result.push(product)
+  //
+  result.push(product)
+  // console.log(result)
+
   // console.log(product)
-  printTotalPrice($result)
+  printTotalPrice(result)
   // return product
 }
+// problem is due to a non filter executed
+// before looping here bottom we need to get which item goes to update
+// we do not need the array and looping
+// it's sufficient to get and id when clicking on button and goes to match the id in the cart (cart-item-id)
 
-function checkItemsQuantity() {
+function checkItemsQuantity(id) {
   // get cart menu
   const cartMenu = document.querySelector('#cart-menu')
 
-  chosenProductsIds.map(id => {
-    // find item to change
-    const findItemInCart = cartMenu.querySelector(`.item-id-${id}`)
-    // get parent element
-    const thisCartItem = findItemInCart.closest('.cart-item')
-    // get quantity element
-    const quantityEl = thisCartItem.querySelector('.quantity')
-    quantityEl.classList.remove('d-none')
-    // get price
-    const thisPrice = thisCartItem
-      .querySelector('.cart-product-price')
-      .textContent.trim()
-      .split(' ')[1]
-    console.log(thisPrice)
+  // find item to change
+  const findItemInCart = cartMenu.querySelector(`.item-id-${id}`)
+  // get parent element
+  const thisCartItem = findItemInCart.closest('.cart-item')
+  // get quantity element
+  const quantityEl = thisCartItem.querySelector('.quantity')
+  quantityEl.classList.remove('d-none')
+  // get price
+  const thisPrice = thisCartItem
+    .querySelector('.cart-product-price')
+    .textContent.trim()
+    .split(' ')[1]
+  // console.log(thisPrice)
 
-    //
-    if (quantityEl.classList.contains('first-click')) {
-      let quantity = parseInt(quantityEl.dataset.quantity)
-      quantity += 1
-      quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
-      quantityEl.setAttribute('data-quantity', quantity)
-      // calculate price for more than a single item
-      calculateNewPrice(quantity, thisPrice)
-    } else {
-      // console.log("this is first click")
-      const quantity = 2
-      quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
-      quantityEl.classList.add('first-click')
-      quantityEl.setAttribute('data-quantity', quantity)
-      // calculate price for more than a single item
-      calculateNewPrice(quantity, thisPrice)
-    }
-  })
+  //
+  if (quantityEl.classList.contains('first-click')) {
+    let quantity = parseInt(quantityEl.dataset.quantity)
+    quantity += 1
+    quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
+    quantityEl.setAttribute('data-quantity', quantity)
+    // calculate price for more than a single item
+    calculateNewPrice(quantity, thisPrice)
+    // localStorage new product quantity
+    // localStorage.setItem('chosenProductIds', chosenProductsIds)
+    // console.log(localStorage.getItem('chosenProductIds'))
+  } else {
+    // console.log("this is first click")
+    const quantity = 2
+    quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
+    quantityEl.classList.add('first-click')
+    quantityEl.setAttribute('data-quantity', quantity)
+    // calculate price for more than a single item
+    calculateNewPrice(quantity, thisPrice)
+    // localStorage new product quantity
+    // localStorage.setItem('chosenProductIds', chosenProductsIds)
+    // console.log(localStorage.getItem('chosenProductIds'))
+  }
 }
 
 function settingCounter() {
@@ -74,7 +85,7 @@ function settingCounter() {
 }
 
 function printTotalPrice(prices) {
-  // console.log(prices)
+  console.log(prices)
   const total = prices.reduce((total, currentPrice) => total + currentPrice, 0)
   // console.log(total)
   const totalResultEl = document.querySelector('#total-price')
@@ -263,7 +274,7 @@ function addItemsToCart(e) {
       // push id into array
       chosenProductsIds.push(itemId)
     } else {
-      checkItemsQuantity()
+      checkItemsQuantity(itemId)
       return
     }
     // console.log(chosenProductsIds)
