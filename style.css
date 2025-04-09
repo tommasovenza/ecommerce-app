@@ -135,6 +135,9 @@ header .icon .items-number {
 .cart-menu .cart-total-price {
   border-top: 1px solid #333;
 }
+.cart-menu .cart-product-price {
+  text-align: right;
+}
 
 /* Sections */
 section.home {
