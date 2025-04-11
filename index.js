@@ -10,31 +10,27 @@ let counter = settingCounter()
 // console.log(counter)
 
 // arrays
-let chosenProductsIds = []
 let allPrices = []
 let dataToSave = []
+// new arrays
+let chosenProductsIds = []
+let duplicateProductsPrice = []
+let wrapper = []
 
 // functions
-function calculateNewPrice(quantity, thisPrice) {
-  const result = []
-  const product = parseInt(quantity) * parseInt(thisPrice)
-  //
-  result.push(product)
-  // console.log(result)
-
-  // console.log(product)
-  printTotalPrice(result)
-  // return product
+function calcDuplicateProductsPrice(quantity, thisPrice) {
+  const priceDuplicates = parseInt(quantity) * parseInt(thisPrice)
+  // console.log(allPrices)
+  if (duplicateProductsPrice.length > 0) {
+    duplicateProductsPrice = []
+  }
+  duplicateProductsPrice.push(priceDuplicates)
+  printTotalPrice(duplicateProductsPrice)
 }
-// problem is due to a non filter executed
-// before looping here bottom we need to get which item goes to update
-// we do not need the array and looping
-// it's sufficient to get and id when clicking on button and goes to match the id in the cart (cart-item-id)
 
 function checkItemsQuantity(id) {
   // get cart menu
   const cartMenu = document.querySelector('#cart-menu')
-
   // find item to change
   const findItemInCart = cartMenu.querySelector(`.item-id-${id}`)
   // get parent element
@@ -49,14 +45,25 @@ function checkItemsQuantity(id) {
     .split(' ')[1]
   // console.log(thisPrice)
 
-  //
   if (quantityEl.classList.contains('first-click')) {
     let quantity = parseInt(quantityEl.dataset.quantity)
     quantity += 1
     quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
     quantityEl.setAttribute('data-quantity', quantity)
     // calculate price for more than a single item
-    calculateNewPrice(quantity, thisPrice)
+    allPrices.push(parseInt(thisPrice))
+    printTotalPrice(allPrices)
+    // calcDuplicateProductsPrice(quantity, thisPrice)
+
+    // create JSON to store
+    const productJsonData = {
+      quantity: quantity,
+      id: parseInt(id)
+    }
+    wrapper = wrapper.filter(item => item.id !== productJsonData.id)
+    wrapper.push(productJsonData)
+    console.log(wrapper)
+
     // localStorage new product quantity
     // localStorage.setItem('chosenProductIds', chosenProductsIds)
     // console.log(localStorage.getItem('chosenProductIds'))
@@ -66,8 +73,24 @@ function checkItemsQuantity(id) {
     quantityEl.textContent = `Q. ${quantity} x $ ${thisPrice}`
     quantityEl.classList.add('first-click')
     quantityEl.setAttribute('data-quantity', quantity)
+
+    // create JSON to store
+    const productJsonData = {
+      quantity: quantity,
+      id: parseInt(id)
+    }
+
+    wrapper = wrapper.filter(item => item.id !== productJsonData.id)
+    wrapper.push(productJsonData)
+    console.log(wrapper)
+
+    // allPrices.push(thisPrice)
+    allPrices.push(parseInt(thisPrice))
+
+    printTotalPrice(allPrices)
+
     // calculate price for more than a single item
-    calculateNewPrice(quantity, thisPrice)
+    // calcDuplicateProductsPrice(quantity, thisPrice)
     // localStorage new product quantity
     // localStorage.setItem('chosenProductIds', chosenProductsIds)
     // console.log(localStorage.getItem('chosenProductIds'))
@@ -85,11 +108,12 @@ function settingCounter() {
 }
 
 function printTotalPrice(prices) {
-  console.log(prices)
+  // console.log(prices)
   const total = prices.reduce((total, currentPrice) => total + currentPrice, 0)
   // console.log(total)
   const totalResultEl = document.querySelector('#total-price')
   totalResultEl.textContent = `$ ${total}`
+
   // set total price, a number in storage to fetch later
   localStorage.setItem('totalPrice', total)
 }
@@ -129,9 +153,9 @@ function updateCounter() {
 }
 
 function retrieveFromStorage(data) {
-  // const data = JSON.parse(rawData)
+  // get cart menu
   const cartMenu = document.querySelector('#cart-menu')
-
+  // loop
   data.map(item => {
     const cartItem = document.createElement('div')
     cartItem.classList.add('cart-item')
@@ -194,18 +218,20 @@ function handleCart(e) {
         .split(' ')[1]
     )
 
+    // delete this
     // get product id
-    const dataQuantity = parseInt(
-      thisCartItem.querySelector('.quantity').dataset.quantity
-    )
+    // const dataQuantity = parseInt(
+    //   thisCartItem.querySelector('.quantity').dataset.quantity
+    // )
 
-    if (dataQuantity >= 2) {
-      const thisProductId = parseInt(
-        thisCartItem.querySelector('.product-id').dataset.productId
-      )
-      // remove id product that is at least duplicated
-      chosenProductsIds = chosenProductsIds.filter(id => id !== thisProductId)
-    }
+    // delete this
+    // if (dataQuantity >= 2) {
+    //   const thisProductId = parseInt(
+    //     thisCartItem.querySelector('.product-id').dataset.productId
+    //   )
+    //   // remove id product that is at least duplicated
+    //   chosenProductsIds = chosenProductsIds.filter(id => id !== thisProductId)
+    // }
 
     // filtering all prices
     allPrices = allPrices.filter(currentPrice => currentPrice !== thisPrice)
@@ -259,7 +285,9 @@ function addItemsToCart(e) {
       .split(':')[1]
       .trim()
 
-    // write logic to sum data and print inside cart total
+    // write logic to sum data and print inside cart total // delete this comment
+
+    // find price
     const rightPrice = parseInt(productPrice.split(' ')[1].trim())
 
     if (allPricesFromStorage !== null) {
@@ -289,7 +317,7 @@ function addItemsToCart(e) {
       productPrice: productPrice
       // quantity: 1
     }
-
+    // pushing
     dataToSave.push(jsonData)
 
     // => store data in localStorage
@@ -446,22 +474,3 @@ function init() {
 }
 // init
 init()
-
-// if(chosenProductsIds.includes(itemId)) {
-//   const thisQuantity = cartItem.querySelector(".quantity.d-none")
-//   thisQuantity.classList.remove("d-none")
-//   thisQuantity.textContent = quantity++
-// }
-
-// => IDEAS
-// ${productName} ${counterItems > 2 ? `x ${counterItems}` : ''}
-// ${productPrice} ${counterItems > 2 ? `${productPrice} x ${counterItems}` : ''}
-// // push id into array
-// chosenProductsIds.push(itemId)
-// // storing allProductIds in storage (Type: Array)
-// localStorage.setItem('allProductIds', JSON.stringify(chosenProductsIds))
-
-// IDEAS
-// if(chosenProductsIds.includes(itemId)) {
-//   counterItems++;
-// }
