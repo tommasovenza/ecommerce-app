@@ -18,6 +18,38 @@ let duplicateProductsPrice = []
 let wrapper = []
 
 // functions
+function printQuantityFromLs() {
+  const quantityDataFromLS = JSON.parse(localStorage.getItem('quantity-for-id'))
+  // get cart menu
+  const cartMenu = document.querySelector('#cart-menu')
+  // loop
+  quantityDataFromLS.map(item => {
+    const currentId = item.id
+    const currentQuantity = item.quantity
+
+    console.log(currentId)
+    console.log(currentQuantity)
+
+    // find item to change
+    const findItemInCart = cartMenu.querySelector(`.item-id-${currentId}`)
+    // get parent element
+    const thisCartItem = findItemInCart.closest('.cart-item')
+    // get quantity element
+    const quantityEl = thisCartItem.querySelector('.quantity')
+    console.log(quantityEl)
+
+    // get price
+    const thisPrice = thisCartItem
+      .querySelector('.cart-product-price')
+      .textContent.trim()
+      .split(' ')[1]
+
+    quantityEl.textContent = `Q. ${currentQuantity} x $ ${thisPrice}`
+    quantityEl.classList.add('first-click')
+    quantityEl.setAttribute('data-quantity', currentQuantity)
+  })
+}
+
 function calcDuplicateProductsPrice(quantity, thisPrice) {
   const priceDuplicates = parseInt(quantity) * parseInt(thisPrice)
   // console.log(allPrices)
@@ -64,6 +96,9 @@ function checkItemsQuantity(id) {
     wrapper.push(productJsonData)
     console.log(wrapper)
 
+    // localstorage
+    localStorage.setItem('quantity-for-id', JSON.stringify(wrapper))
+
     // localStorage new product quantity
     // localStorage.setItem('chosenProductIds', chosenProductsIds)
     // console.log(localStorage.getItem('chosenProductIds'))
@@ -88,6 +123,9 @@ function checkItemsQuantity(id) {
     allPrices.push(parseInt(thisPrice))
 
     printTotalPrice(allPrices)
+
+    // localstorage
+    localStorage.setItem('quantity-for-id', JSON.stringify(wrapper))
 
     // calculate price for more than a single item
     // calcDuplicateProductsPrice(quantity, thisPrice)
@@ -161,6 +199,7 @@ function retrieveFromStorage(data) {
     cartItem.classList.add('cart-item')
     cartItem.innerHTML = `
     <div class="cart-image" style="background-color: ${item.primaryColor}">
+      <div class="item-id-${item.id} product-id" data-product-id="${item.id}"></div>
       <div class="cart-closed">
         <i class="fa-solid fa-xmark"></i>
       </div>
@@ -170,7 +209,7 @@ function retrieveFromStorage(data) {
         ${item.productName}
       </div>
       <div class="cart-product-price">
-        ${item.productPrice}
+        ${item.productPrice} <div class="quantity"></div>
       </div>
     </div>
     `
@@ -441,6 +480,11 @@ function createNavbar() {
 
   if (dataInStorage) {
     retrieveFromStorage(dataInStorage)
+  }
+
+  // retrieving from storage
+  if (localStorage.getItem('quantity-for-id') !== null) {
+    printQuantityFromLs()
   }
 
   if (totalPriceFromStorage !== null) {
